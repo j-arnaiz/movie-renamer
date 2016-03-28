@@ -1,6 +1,7 @@
 require 'yaml'
 require 'themoviedb'
 require 'fileutils'
+require 'digest'
 
 def create_target_folder
   tfolder = @config['target_folder']
@@ -69,7 +70,30 @@ def analyse_folder(dirname)
   results
 end
 
+def add_results(results, file)
+  md5 = Digest::MD5.hexdigest File.read file
+
+  hash = {
+    md5: md5,
+    index: -1,
+    results: []
+  }
+
+  results.each do |result|
+    hash[:results].push(title: result.title, release_date: result.release_date)
+  end
+
+  @file_results.push hash
+end
+
+def write_results
+  File.open('results.yml', 'w') do |file|
+    file.write @file_results.to_yaml
+  end unless @file_results.empty?
+end
+
 @config = YAML.load(File.open('./config.yml'))
+@file_results = []
 
 Tmdb::Api.key(@config['themoviedb_key'])
 Tmdb::Api.language(@config['themoviedb_lang'])
@@ -82,7 +106,13 @@ Dir[@config['load_folder'] + '/**/*'].each do |file|
 
   filename = File.basename(file, ext)
   results = search_for_movie(filename)
-  results += analyse_folder(dirname) if results.empty?
+  results += analyse_folder(dirname)
 
-  rename_file(results[0], file, ext) if results.count == 1
+  if results.count == 1
+    rename_file(results[0], file, ext)
+  else
+    add_results(results, file)
+  end
 end
+
+write_results
