@@ -52,10 +52,12 @@ def parse_string(movie_name)
   new_name
 end
 
-def search_for_movie(filename)
-  query = parse_string(filename)
-
-  results = Tmdb::Movie.find(query)
+def search_for_movie(names)
+  results = []
+  names.each do |name|
+    result = Tmdb::Movie.find(name)
+    results.push(result) unless result.empty?
+  end
 
   results
 end
@@ -70,12 +72,15 @@ def analyse_folder(dirname)
   results
 end
 
-def add_results(results, file)
-  md5 = Digest::MD5.hexdigest File.read file
+def calc_md5(file)
+  Digest::MD5.hexdigest File.read file
+end
 
+def add_results(results, file)
   hash = {
-    md5: md5,
+    md5: calc_md5,
     index: -1,
+    file: file,
     results: []
   }
 
@@ -87,9 +92,51 @@ def add_results(results, file)
 end
 
 def write_results
-  File.open('results.yml', 'w') do |file|
+  File.open(result_file, 'w') do |file|
     file.write @file_results.to_yaml
   end unless @file_results.empty?
+end
+
+def read_results
+  return @read_results if @read_results
+
+  @read_results = []
+
+  return @read_results unless File.file?(result_file)
+
+  @read_results = YAML.load(File.open(result_file))
+end
+
+def result_file
+  @config['load_folder'] + File::SEPARATOR + 'results.yml'
+end
+
+def match_readed_results(file)
+  md5 = calc_md5(file)
+  result = read_results.select { |x| x[:md5] == md5 }
+  return result.results[result.index] if result.index != -1
+
+  nil
+end
+
+def search_names(file, ext)
+  names = []
+  names.push(parse_string(File.basename(file, ext)))
+  dirname = File.dirname(file).gsub(@config['load_folder'] + '/', '')
+  dirname.split(File::SEPARATOR).each do |path|
+    names.push(parse_string(path))
+  end
+
+  names
+end
+
+def object_to_hash(object)
+  hash = {}
+  object.instance_variables.each do |var|
+    hash[var.to_s.delete('@')] = object.instance_variable_get(var)
+  end
+
+  hash
 end
 
 @config = YAML.load(File.open('./config.yml'))
@@ -99,20 +146,25 @@ Tmdb::Api.key(@config['themoviedb_key'])
 Tmdb::Api.language(@config['themoviedb_lang'])
 
 Dir[@config['load_folder'] + '/**/*'].each do |file|
-  file = file
   ext = File.extname(file)
-  dirname = File.dirname(file).gsub(@config['load_folder'] + '/', '')
   next unless @config['extensions'].include?(ext)
 
-  filename = File.basename(file, ext)
-  results = search_for_movie(filename)
-  results += analyse_folder(dirname)
+  names = search_names(file, ext)
 
-  if results.count == 1
-    rename_file(results[0], file, ext)
-  else
-    add_results(results, file)
-  end
+  results = Tmdb::Movie.find('El viaje de arlo')
+  # p object_to_hash(results[0])
+  p object_to_hash(results[0])['title']
+  # matched = matched_readed_results(file)
+  # if matched
+  #   rename_file(matched, file, ext)
+  # else
+  #   results = search_for_movie(names)
+  #   if results.count == 1
+  #     rename_file(results[0], file, ext)
+  #   else
+  #     add_results(results, file)
+  #   end
+  # end
 end
 
 write_results
