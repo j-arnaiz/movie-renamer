@@ -8,18 +8,43 @@ def create_target_folder
   FileUtils.mkdir_p(tfolder) unless File.directory?(tfolder)
 end
 
+def rename_3d
+  return '' unless @mode3d
+
+  trans_3d_mode = {
+    'tab' => ' 3d TAB',
+    'hou' => ' 3d TAB',
+    'sbs' => ' 3d SBS'
+  }
+
+  trans_3d_mode[@mode3d]
+end
+
 def rename_file(movie_info, file, ext)
   release_year = Date.parse(movie_info.release_date).year
-  rename_name = "#{movie_info.title} (#{release_year})#{ext}"
+  rename_name = "#{movie_info.title} (#{release_year})#{rename_3d}#{ext}"
 
   create_target_folder
 
   FileUtils.mv(file, @config['target_folder'] + File::SEPARATOR + rename_name)
 end
 
+def detect_mode3d(name)
+  mode3d = %w(tab hou sbs)
+
+  @mode3d = nil
+  name.split.each do |x|
+    @mode3d = x.downcase if mode3d.include?(x.downcase)
+  end
+end
+
 def parse_string(movie_name)
   dwords = %w(3d tab hou sbs)
+
   new_name = movie_name.gsub(/\[.*\]/, '')
+
+  detect_mode3d(new_name)
+
   new_name = new_name.split.delete_if do |x|
     dwords.include?(x.downcase)
   end.join(' ')
