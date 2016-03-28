@@ -1,0 +1,10 @@
+# Ignore bundler config.
+/.bundle
+
+# Ignore local gems
+/.gems
+
+/config.yml
+
+/movies
+/target

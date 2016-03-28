@@ -1,0 +1,5 @@
+extensions: ['.mp4', '.avi', '.mkv']
+load_folder: './movies'
+target_folder: './target'
+themoviedb_key: 'themoviedb_key'
+themoviedb_lang: 'en'

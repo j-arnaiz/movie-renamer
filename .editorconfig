@@ -1,0 +1,20 @@
+root = true
+
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+tab_width = 2
+indent_style = space
+indent_size = 2
+
+[**.{rb,rake,yml,builder,md,sh}]
+indent_style = space
+indent_size = 2
+
+[Dockerfile]
+indent_style = space
+indent_size = 2
+
+[**.html.erb]
+tab_width = 2
+indent_size = 2
