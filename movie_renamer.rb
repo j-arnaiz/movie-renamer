@@ -73,7 +73,7 @@ def analyse_folder(dirname)
 end
 
 def calc_md5(file)
-  Digest::MD5.hexdigest File.read file
+  File.open(file) { |f| Digest::MD5.hexdigest(f.read) }
 end
 
 def add_results(results, file)
