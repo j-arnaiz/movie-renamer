@@ -72,13 +72,8 @@ def analyse_folder(dirname)
   results
 end
 
-def calc_md5(file)
-  File.open(file) { |f| Digest::MD5.hexdigest(f.read) }
-end
-
 def add_results(results, file)
   hash = {
-    md5: calc_md5(file),
     index: -1,
     file: file,
     results: []
@@ -113,7 +108,7 @@ end
 
 def stringify_keys(hash)
   new_hash = {}
-  hash.each do |k,v|
+  hash.each do |k, v|
     new_hash[k.to_s] = v
   end
 
@@ -121,8 +116,7 @@ def stringify_keys(hash)
 end
 
 def match_readed_results(file)
-  md5 = calc_md5(file)
-  result = read_results.select { |x| x[:md5] == md5 }[0]
+  result = read_results.select { |x| x[:file] == file }[0]
 
   return nil unless result
 
