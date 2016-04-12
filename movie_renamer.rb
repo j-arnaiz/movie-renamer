@@ -56,7 +56,7 @@ end
 def search_for_movie(names)
   results = []
   names.each do |name|
-    results += Tmdb::Movie.find(name)
+    results += Tmdb::Movie.find(name) unless name.empty?
   end
 
   results
