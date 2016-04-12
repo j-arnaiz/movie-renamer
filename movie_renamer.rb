@@ -25,6 +25,7 @@ def rename_file(movie_info, file, ext)
   movie_info = stringify_keys(movie_info)
   release_year = Date.parse(movie_info['release_date']).year
   rename_name = "#{movie_info['title']} (#{release_year})#{rename_3d}#{ext}"
+  rename_name.tr!(':','')
 
   create_target_folder
 
