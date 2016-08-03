@@ -25,11 +25,16 @@ def rename_file(movie_info, file, ext)
   movie_info = stringify_keys(movie_info)
   release_year = Date.parse(movie_info['release_date']).year
   rename_name = "#{movie_info['title']} (#{release_year})#{rename_3d}#{ext}"
-  rename_name.tr!(':','')
+  rename_name.tr!(':', '')
 
   create_target_folder
 
   FileUtils.mv(file, @config['target_folder'] + File::SEPARATOR + rename_name)
+  if @config['remove_folder']
+    dirname = File.dirname(file)
+    puts dirname, @config['load_folder']
+    FileUtils.rm_rf(File.dirname(file)) if dirname != @config['load_folder']
+  end
 end
 
 def detect_mode3d(name)

@@ -3,3 +3,4 @@ load_folder: './movies'
 target_folder: './target'
 themoviedb_key: 'themoviedb_key'
 themoviedb_lang: 'en'
+remove_folder: true
