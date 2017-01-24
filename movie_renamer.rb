@@ -49,9 +49,8 @@ end
 def parse_string(movie_name)
   dwords = %w(3d tab hou sbs)
 
-  new_name = movie_name.gsub(/\[.*\]/, '')
-
-  detect_mode3d(new_name)
+  detect_mode3d(movie_name)
+  new_name = movie_name.gsub(/\[.*\]/, '').gsub(/(.*)/, '')
 
   new_name = new_name.split.delete_if do |x|
     dwords.include?(x.downcase)
@@ -137,7 +136,9 @@ end
 def search_names(file, ext)
   names = []
   names.push(parse_string(File.basename(file, ext)))
-  dirname = File.dirname(file).gsub(@config['load_folder'] + '/', '')
+  dirname = File.dirname(file).gsub(
+    @config['load_folder'], ''
+  ).gsub(%r{^\/}, '')
   dirname.split(File::SEPARATOR).each do |path|
     names.push(parse_string(path))
   end
