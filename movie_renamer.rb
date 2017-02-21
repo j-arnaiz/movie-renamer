@@ -50,7 +50,7 @@ def parse_string(movie_name)
   dwords = %w(3d tab hou sbs)
 
   detect_mode3d(movie_name)
-  new_name = movie_name.gsub(/\[.*\]/, '').gsub(/(.*)/, '')
+  new_name = movie_name.gsub(/\[.*\]/, '').gsub(/\(.*\)/, '')
 
   new_name = new_name.split.delete_if do |x|
     dwords.include?(x.downcase)
