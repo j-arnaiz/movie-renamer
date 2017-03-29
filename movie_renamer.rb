@@ -21,11 +21,22 @@ def rename_3d
   trans_3d_mode[@mode3d]
 end
 
+def send_telegram_notification(msg)
+  command = 'curl -i -X GET \'https://api.telegram.org/bot' +
+            @config['telegram_api_key'].to_s +
+            '/sendMessage?chat_id=' +
+            @config['telegram_chat_id'].to_s + '&text=' +
+            URI.encode(msg) +
+            '\''
+  `#{command}`
+end
+
 def rename_file(movie_info, file, ext)
   movie_info = stringify_keys(movie_info)
   release_year = Date.parse(movie_info['release_date']).year
   rename_name = "#{movie_info['title']} (#{release_year})#{rename_3d}#{ext}"
   rename_name.tr!(':', '')
+  send_telegram_notification("Movie parsed: #{rename_name}")
 
   create_target_folder
 
